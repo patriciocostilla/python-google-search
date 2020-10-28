@@ -1,4 +1,5 @@
 import json
+import sys
 from googleapiclient.discovery import build
 from constants import *
 import requests
@@ -15,12 +16,18 @@ def get_page_text(link):
     page_text = soup.body.get_text()
     return page_text.strip()
 
+def get_content_from_search(search_term):
+    r = google_search(search_term)
+    results = r["items"][:MAX_AMOUNT]
+    for result in results:
+        page_text = get_page_text(result['link'])
+        return (result['title'], result['link'], page_text)
+
 
 if __name__ == "__main__":
-    r = google_search("Hello world!")
-    results = r["items"][:MAX_AMOUNT]
-    print(results[0])
-    for result in results:
-        print(f"{result['title']}: {result['link']}")
-        page_text = get_page_text(result['link'])
-        print(f"page text: {page_text}")
+    if len(sys.argv) != 2:
+        print("Wrong amount of parameters passed, usage: main.py <search-term>")
+    else:
+        contentTuple = get_content_from_search(sys.argv[1])
+        print(contentTuple)
+    
